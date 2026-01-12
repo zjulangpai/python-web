@@ -1,0 +1,33 @@
+replicaCount: 1
+
+image:
+  # Use your registry/repository, e.g. "docker.io/youruser/python-web"
+  repository: ""
+  # If empty, the chart will default to the Chart appVersion
+  tag: ""
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+podAnnotations: {}
+podLabels: {}
+
+env: []
+  # - name: EXAMPLE_ENV
+  #   value: "value"
+

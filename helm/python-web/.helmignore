@@ -1,0 +1,23 @@
+# Common VCS files
+.git/
+.gitignore
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.venv/
+
+# MacOS
+.DS_Store
+
+# IDE settings
+.idea/
+.vscode/
+
+# Others
+*.swp
+*.tmp
+

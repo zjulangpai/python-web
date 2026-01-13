@@ -1,0 +1,42 @@
+# Container image for the web app
+image:
+  repository: registry-huadong1.crs-internal.ctyun.cn/vibe-test/python-web
+  tag: "latest"
+  pullPolicy: Always
+
+web:
+  replicas: 1
+  service:
+    type: ClusterIP
+    port: 8000
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
+    limits:
+      cpu: "200m"
+      memory: "256Mi"
+  env:
+    extra: []
+    # - name: EXAMPLE
+    #   value: example
+
+redis:
+  enabled: true
+  replicas: 1
+  image: registry-huadong1.crs-internal.ctyun.cn/artifact-hub/redis:7.2-alpine
+  port: 6379
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
+    limits:
+      cpu: "200m"
+      memory: "256Mi"
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClassName: ""
+    # When storageClassName is empty and the cluster has no default StorageClass,
+    # enable this to fall back to emptyDir to avoid unbound PVCs.
+    fallbackToEmptyDir: true

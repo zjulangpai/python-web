@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-web
+  labels:
+    app.kubernetes.io/name: python-web
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: web
+spec:
+  replicas: {{ .Values.web.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: python-web
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: web
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: python-web
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: web
+    spec:
+      initContainers:
+        - name: wait-for-redis
+          image: registry-huadong1.crs-internal.ctyun.cn/artifact-hub/redis:7.2-alpine
+          command:
+            - sh
+            - -c
+            - >
+              until redis-cli -h {{ .Release.Name }}-redis -p {{ .Values.redis.port }} ping;
+              do echo "Waiting for redis..."; sleep 2; done
+      containers:
+        - name: web
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 8000
+          env:
+            - name: REDIS_HOST
+              value: "{{ .Release.Name }}-redis"
+            - name: REDIS_PORT
+              value: "{{ .Values.redis.port | toString }}"
+          {{- with .Values.web.env.extra }}
+          # Extra env from values
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.web.resources | nindent 12 }}

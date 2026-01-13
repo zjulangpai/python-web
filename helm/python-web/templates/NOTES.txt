@@ -1,0 +1,13 @@
+Thank you for installing python-web!
+
+This chart deploys:
+- FastAPI app Service: {{ .Release.Name }}-web
+- Redis Service: {{ .Release.Name }}-redis (ClusterIP)
+
+Get the web Service URL by running:
+  kubectl get svc {{ .Release.Name }}-web
+
+If using port-forward:
+  kubectl port-forward svc/{{ .Release.Name }}-web 8000:8000
+  Then visit: http://localhost:8000/health
+

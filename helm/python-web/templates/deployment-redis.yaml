@@ -1,0 +1,65 @@
+{{- if .Values.redis.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-redis
+  labels:
+    app.kubernetes.io/name: python-web
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: redis
+spec:
+  serviceName: {{ .Release.Name }}-redis-headless
+  replicas: {{ .Values.redis.replicas | default 1 }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: python-web
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: redis
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: python-web
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: redis
+    spec:
+      containers:
+        - name: redis
+          image: "{{ .Values.redis.image }}"
+          imagePullPolicy: IfNotPresent
+          args: ["redis-server","--appendonly","yes"]
+          ports:
+            - containerPort: {{ .Values.redis.port }}
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.redis.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.redis.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+          resources:
+            {{- toYaml .Values.redis.resources | nindent 12 }}
+      {{- if or (not .Values.redis.persistence.enabled) (and .Values.redis.persistence.enabled (not .Values.redis.persistence.storageClassName) .Values.redis.persistence.fallbackToEmptyDir) }}
+      volumes:
+        - name: redis-data
+          emptyDir: {}
+      {{- end }}
+  {{- if and .Values.redis.persistence.enabled (or .Values.redis.persistence.storageClassName (not .Values.redis.persistence.fallbackToEmptyDir)) }}
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- if .Values.redis.persistence.storageClassName }}
+        storageClassName: {{ .Values.redis.persistence.storageClassName }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.redis.persistence.size }}
+  {{- end }}
+{{- end }}

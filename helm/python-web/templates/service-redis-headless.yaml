@@ -1,0 +1,21 @@
+{{- if .Values.redis.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-redis-headless
+  labels:
+    app.kubernetes.io/name: python-web
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: redis
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: python-web
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: redis
+  ports:
+    - name: redis
+      port: {{ .Values.redis.port }}
+      targetPort: {{ .Values.redis.port }}
+{{- end }}
+

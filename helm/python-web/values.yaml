@@ -7,8 +7,14 @@ image:
 web:
   replicas: 1
   service:
-    type: ClusterIP
+    type: LoadBalancer
     port: 8000
+    annotations:
+      service.beta.kubernetes.io/ctyun-loadbalancer-acl-flag: "inherit"
+      service.beta.kubernetes.io/ctyun-loadbalancer-address-type: "internet"
+      service.beta.kubernetes.io/ctyun-loadbalancer-health-check-flag: "off"
+      service.beta.kubernetes.io/ctyun-loadbalancer-id: "lb-hhth7nlyp0"
+      service.beta.kubernetes.io/ctyun-loadbalancer-protocol-port: "tcp:8000"
   resources:
     requests:
       cpu: "200m"

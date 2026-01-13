@@ -1,0 +1,21 @@
+{{- if .Values.postgres.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-postgres-headless
+  labels:
+    app.kubernetes.io/name: python-web
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: postgres
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: python-web
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: postgres
+  ports:
+    - name: postgres
+      port: {{ .Values.postgres.port }}
+      targetPort: {{ .Values.postgres.port }}
+{{- end }}
+

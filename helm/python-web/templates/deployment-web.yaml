@@ -22,13 +22,21 @@ spec:
     spec:
       initContainers:
         - name: wait-for-redis
-          image: registry-huadong1.crs-internal.ctyun.cn/artifact-hub/redis:7.2-alpine
+          image: "{{ .Values.redis.image }}"
           command:
             - sh
             - -c
             - >
               until redis-cli -h {{ .Release.Name }}-redis -p {{ .Values.redis.port }} ping;
               do echo "Waiting for redis..."; sleep 2; done
+        - name: wait-for-postgres
+          image: "{{ .Values.postgres.image }}"
+          command:
+            - sh
+            - -c
+            - >
+              until pg_isready -h {{ .Release.Name }}-postgres -p {{ .Values.postgres.port }};
+              do echo "Waiting for postgres..."; sleep 2; done
       containers:
         - name: web
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -40,6 +48,16 @@ spec:
               value: "{{ .Release.Name }}-redis"
             - name: REDIS_PORT
               value: "{{ .Values.redis.port | toString }}"
+            - name: POSTGRES_HOST
+              value: "{{ .Release.Name }}-postgres"
+            - name: POSTGRES_PORT
+              value: "{{ .Values.postgres.port | toString }}"
+            - name: POSTGRES_DB
+              value: "{{ .Values.postgres.auth.database }}"
+            - name: POSTGRES_USER
+              value: "{{ .Values.postgres.auth.username }}"
+            - name: POSTGRES_PASSWORD
+              value: "{{ .Values.postgres.auth.password }}"
           {{- with .Values.web.env.extra }}
           # Extra env from values
           {{- toYaml . | nindent 10 }}

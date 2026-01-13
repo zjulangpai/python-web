@@ -46,3 +46,27 @@ redis:
     # When storageClassName is empty and the cluster has no default StorageClass,
     # enable this to fall back to emptyDir to avoid unbound PVCs.
     fallbackToEmptyDir: true
+
+postgres:
+  enabled: true
+  replicas: 1
+  image: registry-huadong1.crs-internal.ctyun.cn/artifact-hub/postgres:16.1-alpine
+  port: 5432
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
+    limits:
+      cpu: "200m"
+      memory: "256Mi"
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClassName: ""
+    # When storageClassName is empty and the cluster has no default StorageClass,
+    # enable this to fall back to emptyDir to avoid unbound PVCs.
+    fallbackToEmptyDir: true
+  auth:
+    database: appdb
+    username: appuser
+    password: apppass
